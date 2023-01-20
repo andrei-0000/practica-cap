@@ -1,9 +1,9 @@
+// ===================== apartat a) =====================
+
 function callcc(f) {
     let kont = new Continuation();
     return f(kont);
 }
-
-
 
 function make_coroutine(aResumer) {
     let firstTime = true;
@@ -27,6 +27,9 @@ function make_coroutine(aResumer) {
 
     return (retFunction)
 }
+
+// ----------------------- exemple -----------------------
+
 
 function exemple_senzill() {
     let a = make_coroutine(function (resume, value) {
@@ -56,6 +59,48 @@ function exemple_senzill() {
 
 //exemple_senzill()
 
+// ----------------------- tests extra -----------------------
+
+
+function daily_routine() {
+  let agenda = make_coroutine(function (resume, value) {
+      print("Time to start the day!");
+      print("Just ", resume(brush_teeth, 'agenda'));
+      print("on to the next thing!");
+      print("Just ", resume(had_breakfast, 'agenda'));
+      print("on to the next thing!");
+      print("Just ", resume(dress_up, 'agenda'));
+      print("on to the next thing!");
+      print("Just ", resume(go_to_uni, 'agenda'));
+      print("on to the next thing!");
+      print("Just ", resume(come_back, 'agenda'));
+      print("on to the next thing!");
+      print("Just ", resume(chill, 'agenda'));
+  });
+  let brush_teeth = make_coroutine(function (resume, value) {
+      print(resume(agenda, 'brushed my teeth.'));
+  });
+  let had_breakfast = make_coroutine(function (resume, value) {
+      print(resume(agenda, 'had breakfast.'));
+  });
+  let dress_up = make_coroutine(function (resume, value) {
+    print(resume(agenda, 'dressed up.'));
+  });
+  let go_to_uni = make_coroutine(function (resume, value) {
+    print(resume(agenda, 'went to University.'));
+  });
+  let come_back = make_coroutine(function (resume, value) {
+    print(resume(agenda, 'came back home.'));
+  });
+  let chill = make_coroutine(function (resume, value) {
+    print(resume(agenda, 'finished my day!.'));
+  });
+  if (typeof (agenda) === 'function') {
+      agenda('*')
+  }
+}
+
+//daily_routine();
 
 function tick_tock() {
     var seconds = 0;
@@ -80,24 +125,30 @@ function tick_tock() {
         print("'Tock!'");
         print(resume(tick, seconds += 1), " seconds have passed")
     });
-    // amb aquest codi evitem "complicar-nos la vida" amb
-    // problemes d'acabament quan cridem la corutina inicial
     if (typeof (tick) === 'function') {
-        tick('') // el valor '' que passem a 'a' és irrellevant
+        tick('')
     }
 }
 
-//   tick_tock();
+//tick_tock();
 
+
+// ===================== apartat b) =====================
 
 let a1 = [[[[1], []], [[2], [[3], [4]]]], [[[], [5]], [[6], [7]]]]
 let a2 = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], []]]]
 let a3 = [[[[1], [2]], [[3], [4]]], [[[5], [9]], [[7], []]]]
 let a4 = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]]
 
+let a5 = [[[[[1], []], [[2], [[3], [4]]]], [[[], [5]], [[6], [7]]]], [[[[1], [2]], [[3], [4]]], [[[5], [9]], [[7], []]]]]
+let a6 = [[[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], []]]],[[[[1], [2]], [[3], [4]]], [[[5], [9]], [[7], []]]]]
+let a7 = [1]
+let a8 = [1]
+let a9 = []
+let a10 = []
+
 function is_leaf(tree) {
     if (tree.length > 1) {
-        //print("is not leaf")
         return false;
     }
     return true;
@@ -115,10 +166,8 @@ function same_fringe(tree1, tree2) {
 
     let tree_coroutine1 = make_coroutine(function (resume, tree) {
         function navigateTree(tree) {
-            //print('reached tree1')
             if (is_leaf(tree)) {
                 tmp1 = tree[0];
-                //print('tree1 leaf val: ', tmp1)
                 resume(tree_coroutine2, tree2)
             }
             if (tree[0] != undefined && tree[0].length > 0) navigateTree(tree[0]);
@@ -134,10 +183,8 @@ function same_fringe(tree1, tree2) {
 
     let tree_coroutine2 = make_coroutine(function (resume, tree) {
         function navigateTree(tree) {
-            //print('reached tree2')
             if (is_leaf(tree)) {
                 tmp2 = tree[0];
-                //print('tree2 leaf val: ', tmp2)
                 if (tmp1 == tmp2 && !tree1Ended) {
                     lasttmp1 = tmp1;
                     resume(tree_coroutine1, tree1);
@@ -151,7 +198,6 @@ function same_fringe(tree1, tree2) {
         }
         if (!tree2Ended && areSame) {
             navigateTree(tree);
-            //print('acaba arbre 2')
             tree2Ended = true;
             if (tmp1 != lasttmp1 && !tree1Ended)
                 areSame = false;
@@ -166,11 +212,18 @@ function same_fringe(tree1, tree2) {
     return areSame;
 }
 
-print(same_fringe(a1,a2)) // true
-print(same_fringe(a1,a4)) // false
-print(same_fringe(a4,a2)) // false
-print(same_fringe(a3, a4)) // false
+// ----------------------- exemple -----------------------
 
-print(same_fringe(a2,a3)) // false
+//print(same_fringe(a1,a2)) // true
+//print(same_fringe(a1,a4)) // false
+//print(same_fringe(a4,a2)) // false
+//print(same_fringe(a3, a4)) // false
 
+
+// ----------------------- tests extra -----------------------
+
+//print(same_fringe(a2,a3)) // false
+//print (same_fringe(a5, a6)) //true
+//print (same_fringe(a7, a8)) //true
+//print (same_fringe(a9, a10)) //true
 
