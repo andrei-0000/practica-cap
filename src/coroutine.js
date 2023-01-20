@@ -108,6 +108,10 @@ function same_fringe (tree1, tree2) {
 
     let tmp1 = 0;
     let tmp2 = 0;
+
+    let areSame = true;
+    let tree1Ended = false;
+    let tree2Ended = false;
     
     let tree_coroutine1 = make_coroutine(function(resume, tree) {
         function navigateTree(tree) {
@@ -116,13 +120,12 @@ function same_fringe (tree1, tree2) {
             tmp1 = tree[0];
             print('tree1 leaf val: ', tmp1)
             resume(tree_coroutine2, tree2)
-            //return;
         }
         if (tree[0] != undefined && tree[0].length>0)navigateTree(tree[0]);
         if (tree[1] != undefined && tree[1].length>0)navigateTree(tree[1]);
         }
         navigateTree(tree);
-        return true;
+        tree1Ended = true;
     })
 
     let tree_coroutine2 = make_coroutine(function(resume, tree) {
@@ -132,26 +135,33 @@ function same_fringe (tree1, tree2) {
             tmp2 = tree[0];
             print('tree2 leaf val: ', tmp2)
             if (tmp1 == tmp2)
-                resume(tree_coroutine1, tree1)
-            else return false;
+                resume(tree_coroutine1, tree1);
+            else {
+              areSame = false
+            }
         }
-        if (tree[0] != undefined && tree[0].length>0)navigateTree(tree[0]);
-        if (tree[1] != undefined && tree[1].length>0)navigateTree(tree[1]);
+        if (tree[0] != undefined && tree[0].length>0 && areSame)navigateTree(tree[0]);
+        if (tree[1] != undefined && tree[1].length>0 && areSame)navigateTree(tree[1]);
       }
       navigateTree(tree);
-      return true;
+      print('acaba arbre 2')
+      tree2Ended = true;
     })
-
-    let compare = make_coroutine(function(resume, tree) {
-      tree_coroutine1(tree1)
-    })
-    tree_coroutine1(tree1)
-    return true;
+    if (typeof(tree_coroutine1) === 'function') { 
+      tree_coroutine1(tree1) 
+    }
+    while (!tree1Ended && !tree2Ended) {
+      resume(tree_coroutine1, tree1);
+      resume(tree_coroutine2, tree2);
+    }
+    return areSame;
 }
 
-//print(same_fringe(a1,a2)) // true
-print(same_fringe(a1,a4)) // false
+print(same_fringe(a1,a2)) // true
+//print(same_fringe(a1,a4)) // false
 //print(same_fringe(a4,a2)) // false
 //print(same_fringe(a3,a4)) // false
+
+//print(same_fringe(a2,a3)) // false
 
 
