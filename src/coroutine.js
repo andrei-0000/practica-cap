@@ -106,37 +106,38 @@ function is_leaf (tree) {
 
 function same_fringe (tree1, tree2) {
 
-    let tmp1;
-    let tmp2;
+    let tmp1 = 0;
+    let tmp2 = 0;
     
     let tree_coroutine1 = make_coroutine(function(resume, tree) {
+        function navigateTree(tree) {
         if (is_leaf(tree)) {
-            tmp1 = tree;
+            tmp1 = tree[0];
             resume(tree_coroutine2, tree2)
         }
-        resume(tree_coroutine1, tree[0]);
-        resume(tree_coroutine1, tree[1]);
+        if (tree[0] != null)navigateTree(tree[0]);
+        if (tree[1] != null)navigateTree(tree[1]);
+        }
+        navigateTree(tree);
+        return true;
     })
 
     let tree_coroutine2 = make_coroutine(function(resume, tree) {
+        function navigateTree(tree) {
         if (is_leaf(tree)){ 
-            tmp2 = tree;
+            tmp2 = tree[0];
             if (tmp1 == tmp2)
-                resume(compare_tree('*'))
+                resume(tree_coroutine1, tree1)
             else return false;
         }
-        resume(tree_coroutine2, tree[0]);
-        resume(tree_coroutine2, tree[1]);
+        if (tree[0] != null)navigateTree(tree[0]);
+        if (tree[1] != null)navigateTree(tree[1]);
+      }
+      navigateTree(tree);
+      return true;
     })
-
-    let compare_tree = make_coroutine(function(resume, value) {
-        if (is_leaf(tree1))
-            return true;
-        resume(tree_coroutine1, tree1)
-    })
-    
-    let val = compare_tree('*')
-    return val;
+    tree_coroutine1(tree1)
+    return true;
 }
 
 print(same_fringe(a1,a2)) // true
