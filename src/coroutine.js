@@ -111,12 +111,15 @@ function same_fringe (tree1, tree2) {
     
     let tree_coroutine1 = make_coroutine(function(resume, tree) {
         function navigateTree(tree) {
+        print('reached tree1')
         if (is_leaf(tree)) {
             tmp1 = tree[0];
+            print('tree1 leaf val: ', tmp1)
             resume(tree_coroutine2, tree2)
+            //return;
         }
-        if (tree[0] != null)navigateTree(tree[0]);
-        if (tree[1] != null)navigateTree(tree[1]);
+        if (tree[0] != undefined && tree[0].length>0)navigateTree(tree[0]);
+        if (tree[1] != undefined && tree[1].length>0)navigateTree(tree[1]);
         }
         navigateTree(tree);
         return true;
@@ -124,25 +127,31 @@ function same_fringe (tree1, tree2) {
 
     let tree_coroutine2 = make_coroutine(function(resume, tree) {
         function navigateTree(tree) {
+        print('reached tree2')
         if (is_leaf(tree)){ 
             tmp2 = tree[0];
+            print('tree2 leaf val: ', tmp2)
             if (tmp1 == tmp2)
                 resume(tree_coroutine1, tree1)
             else return false;
         }
-        if (tree[0] != null)navigateTree(tree[0]);
-        if (tree[1] != null)navigateTree(tree[1]);
+        if (tree[0] != undefined && tree[0].length>0)navigateTree(tree[0]);
+        if (tree[1] != undefined && tree[1].length>0)navigateTree(tree[1]);
       }
       navigateTree(tree);
       return true;
+    })
+
+    let compare = make_coroutine(function(resume, tree) {
+      tree_coroutine1(tree1)
     })
     tree_coroutine1(tree1)
     return true;
 }
 
-print(same_fringe(a1,a2)) // true
+//print(same_fringe(a1,a2)) // true
 print(same_fringe(a1,a4)) // false
-print(same_fringe(a4,a2)) // false
-print(same_fringe(a3,a4)) // false
+//print(same_fringe(a4,a2)) // false
+//print(same_fringe(a3,a4)) // false
 
 
